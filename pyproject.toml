@@ -1,0 +1,12 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "regexrename"
+author = "Jesse Mullan"
+author-email = "jmullan@gmail.com"
+home-page = "http://github.com/jmullan/regexrename"
+
+[tool.flit.scripts]
+regexrename="regexrename:main"

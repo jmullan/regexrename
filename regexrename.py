@@ -47,6 +47,12 @@ def main():
         help='Add a parentheticized number to resolve conflicts. (1)')
 
     parser.add_option(
+        '--count', dest='count',
+        default=0,
+        type=int,
+        help='Do at most this many replacements for each name')
+
+    parser.add_option(
         '--flags', dest='flags', default='',
         help="Python regex flags")
 
@@ -64,6 +70,8 @@ def main():
             "You must supply a pattern, a replacement"
             " and at least one filename\n")
         exit(1)
+
+    count = options.count
 
     flag_string = options.flags
     flags = []
@@ -97,10 +105,12 @@ def main():
         if not os.path.exists(from_filename):
             sys.stderr.write("%s does not exist\n" % from_filename)
 
-        to_filename = re.sub(regex, replacement, from_filename)
+        to_filename = re.sub(regex, replacement, from_filename, count=count)
         if from_filename == to_filename:
             if verbose:
-                sys.stdout.write('No change for %s\n' % from_filename)
+                sys.stdout.write(
+                    'No change for %s\n' %
+                     from_filename.encode('UTF-8', 'ignore').decode('UTF-8'))
             continue
 
         if os.path.exists(to_filename) and not options.force:
@@ -128,7 +138,7 @@ def main():
             if parent_directory and not os.path.exists(parent_directory):
                 if options.parents:
                     try:
-                        os.mkdirs(parent_directory)
+                        os.makedirs(parent_directory)
                     except os.error as ex:
                         sys.stderr.write('Could not create parent dir %s\n' % (
                             parent_directory))

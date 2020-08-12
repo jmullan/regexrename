@@ -1,7 +1,7 @@
 Installation:
 
     pip3 install flit
-    flit install --symlink --python /usr/bin/python3
+    flit install --symlink --python $(which python3)
 
 It should install to `~/.local/bin`, which you might have to add to your path
 
