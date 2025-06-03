@@ -47,6 +47,11 @@ def main():
         help='Add a parentheticized number to resolve conflicts. (1)')
 
     parser.add_option(
+        '--copy-only', dest='copy_only',
+        action='store_true', default=False,
+        help='Copy instead of moving')
+
+    parser.add_option(
         '--count', dest='count',
         default=0,
         type=int,
@@ -70,6 +75,14 @@ def main():
             "You must supply a pattern, a replacement"
             " and at least one filename\n")
         exit(1)
+    copy_only = options.copy_only
+
+    if copy_only:
+        action = 'Copying'
+        actioned = 'copied'
+    else:
+        action = 'Renaming'
+        actioned = 'renamed'
 
     count = options.count
 
@@ -94,7 +107,7 @@ def main():
     replacement = args[1]
 
     if verbose:
-        sys.stdout.write('%s -> %s\n' % (pattern, replacement))
+        sys.stdout.write('%r -> %r\n' % (pattern, replacement))
 
     filenames = args[2:]
 
@@ -128,11 +141,11 @@ def main():
                     to_filename = '%s (%s)' % (base_filename, counter)
             else:
                 sys.stderr.write(
-                    "%s not renamed: %s already exists\n" % (
-                        from_filename, to_filename))
+                    "%s not %s: %s already exists\n" % (
+                        from_filename, actioned, to_filename))
         if options.no_act:
-            sys.stdout.write('Dry run: renamed %s to %s\n' % (
-                from_filename, to_filename))
+            sys.stdout.write('Dry run: %s %s to %s\n' % (
+                from_filename, actioned, to_filename))
         else:
             parent_directory = os.path.dirname(to_filename)
             if parent_directory and not os.path.exists(parent_directory):
@@ -145,27 +158,30 @@ def main():
                         continue
                 else:
                     sys.stderr.write(
-                        '%s not moved to %s:'
+                        '%s not %s to %s:'
                         ' parent directory %s does not exist (use -p)\n' % (
-                            from_filename, to_filename, parent_directory))
+                            from_filename, actioned, to_filename, parent_directory))
                     continue
 
             if parent_directory and not os.path.isdir(parent_directory):
                 sys.stderr.write(
-                    '%s not moved to %s:'
+                    '%s not %s to %s:'
                     ' parent directory %s is not a direcotry (use -p)\n' % (
-                        from_filename, to_filename, parent_directory))
+                        from_filename, actioned, to_filename, parent_directory))
                 continue
 
             try:
                 if verbose:
-                    sys.stdout.write('Moving %s to %s\n' % (
-                        from_filename, to_filename))
-                shutil.move(from_filename, to_filename)
+                    sys.stdout.write('%s %s to %s\n' % (
+                        action, from_filename, to_filename))
+                if copy_only:
+                    shutil.move(from_filename, to_filename)
+                else:
+                    shutil.copy(from_filename, to_filename)
             except Exception as ex:
                 sys.stderr.write(
-                    "%s not renamed to %s: %s\n" % (
-                        from_filename, to_filename, ex))
+                    "%s not %s to %s: %s\n" % (
+                        from_filename, actioned, to_filename, ex))
 
 
 if __name__ == "__main__":
